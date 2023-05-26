@@ -1,5 +1,5 @@
 CPATH='.:lib/hamcrest-core-1.3.jar:lib/junit-4.13.2.jar'
-
+# CPATH2='.:hamcrest-core-1.3.jar:junit-4.13.2.jar'
 rm -rf student-submission
 rm -rf grading-area
 
@@ -40,36 +40,30 @@ cd grading-area/
 set +e
 
 ### above this is fine
-
-javac -cp hamcrest-core-1.3.jar junit-4.13.2.jar TestListExamples.java
-
-for file in `ls`
-do
-    if [[ $file != *jar ]]
-    then
-        echo $file
-        javac $file
-    fi
-done
-
-: '
-for file in `find grading-area/`
-do 
-    echo $file
-done
-
-
-javac TestListExamples.java
+javac -cp .:hamcrest-core-1.3.jar:junit-4.13.2.jar *.java 2> output.txt
 if [[ $? != 0 ]]
 then 
     echo "The tester did not compile"
-    exit
+    cat output.txt
 fi
 
-javac $studentFile
-if [[ $? != 0 ]]
+for file in `ls`
+do
+    if [[ -f $file ]] && [[ $file == ListExamples.java ]]
+    then 
+        # run stuff
+        java -cp .:hamcrest-core-1.3.jar:junit-4.13.2.jar org.junit.runner.JUnitCore TestListExamples > output.txt
+        if [[ $? != 0 ]]
+        then 
+            echo "The tests did not succeed"
+        else
+            echo "All tests succeeded!"
+        fi
+        testsRan=true
+    fi
+done
+
+if [[ $testsRan = false ]]
 then 
-    echo "The submitted code did not compile"
-    exit
+    echo "Missing the file 'ListExamples.java'" > output.txt
 fi
-'
