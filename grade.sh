@@ -39,12 +39,24 @@ cp TestListExamples.java grading-area
 cd grading-area/
 set +e
 
-### above this is fine
-javac -cp .:hamcrest-core-1.3.jar:junit-4.13.2.jar *.java 2> output.txt
-if [[ $? != 0 ]]
+compile=false
+for file in `ls`
+do
+    if [[ -f $file ]] && [[ $file == ListExamples.java ]]
+    then 
+        javac -cp .:hamcrest-core-1.3.jar:junit-4.13.2.jar *.java 2> output.txt
+        if [[ $? != 0 ]]
+        then 
+            echo "The tester did not compile"
+            cat output.txt
+        fi
+        compile=true
+    fi
+done
+
+if [[ $compile = false ]]
 then 
-    echo "The tester did not compile"
-    cat output.txt
+    echo "\nMissing the file 'ListExamples.java', check to ensure correct spelling and directory organization." >> output.txt
 fi
 
 for file in `ls`
@@ -59,11 +71,8 @@ do
         else
             echo "All tests succeeded!"
         fi
-        testsRan=true
     fi
 done
 
-if [[ $testsRan = false ]]
-then 
-    echo "Missing the file 'ListExamples.java'" > output.txt
-fi
+
+cat output.txt
